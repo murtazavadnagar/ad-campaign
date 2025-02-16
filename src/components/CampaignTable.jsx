@@ -1,18 +1,18 @@
+import React from "react";
 import { useSelector } from "react-redux";
-import {
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  TableContainer,
-  Paper,
-} from "@mui/material";
+import moment from "moment/moment";
+import { DataGrid } from "@mui/x-data-grid";
+import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
 
-const CampaignTable = () => {
+import CustomNoRowsOverlay from "./FallbackRowOverlay";
+import { formatCurrency } from "../utils/collection";
+
+const CampaignTable = (props) => {
   const { campaigns, filterText, filterDateRange, users } = useSelector(
     (state) => state.campaigns
   );
+  const { status } = props;
 
   const filteredCampaigns = campaigns.filter((campaign) => {
     const matchesText = campaign.name
@@ -29,49 +29,75 @@ const CampaignTable = () => {
     return matchesText && withinDateRange;
   });
 
+  const columns = [
+    { field: "name", headerName: "Name", flex: 1, sortable: true },
+    {
+      field: "userId",
+      headerName: "User Name",
+      flex: 1,
+      valueGetter: (params) => {
+        const userName = users.find((user) => user.id === params);
+        return userName ? userName.name : "Unknown User";
+      },
+    },
+    {
+      field: "startDate",
+      headerName: "Start Date",
+      flex: 1,
+      sortable: true,
+      valueFormatter: (params) => moment(params).format("DD/MM/YYYY"),
+    },
+    {
+      field: "endDate",
+      headerName: "End Date",
+      flex: 1,
+      sortable: true,
+      valueFormatter: (params) => moment(params).format("DD/MM/YYYY"),
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 1,
+      sortable: true,
+      renderCell: (params) => {
+        const isActive =
+          new Date() >= new Date(params.row.startDate) &&
+          new Date() <= new Date(params.row.endDate);
+        return (
+          <Chip
+            label={isActive ? "Active" : "Inactive"}
+            color={isActive ? "success" : "error"}
+          />
+        );
+      },
+    },
+    {
+      field: "Budget",
+      headerName: "Budget (USD)",
+      flex: 1,
+      type: "number",
+      sortable: true,
+      valueFormatter: (params) => formatCurrency(params),
+    },
+  ];
+
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Start Date</TableCell>
-            <TableCell>End Date</TableCell>
-            <TableCell>Status</TableCell>
-            <TableCell>Budget</TableCell>
-            <TableCell>User</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filteredCampaigns.map((campaign) => (
-            <TableRow key={campaign.id}>
-              <TableCell>{campaign.name}</TableCell>
-              <TableCell>{campaign.startDate}</TableCell>
-              <TableCell>{campaign.endDate}</TableCell>
-              <TableCell
-                style={{
-                  color:
-                    new Date() >= new Date(campaign.startDate) &&
-                    new Date() <= new Date(campaign.endDate)
-                      ? "green"
-                      : "red",
-                }}
-              >
-                {new Date() >= new Date(campaign.startDate) &&
-                new Date() <= new Date(campaign.endDate)
-                  ? "Active"
-                  : "Inactive"}
-              </TableCell>
-              <TableCell>${campaign.Budget}</TableCell>
-              <TableCell>
-                {users.find((user) => user.id === campaign.userId)?.name ||
-                  "Unknown User"}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <Box sx={{ height: "auto", width: "100%", marginTop: 4 }}>
+      <DataGrid
+        rows={filteredCampaigns}
+        columns={columns}
+        disableSelectionOnClick
+        sortingOrder={["desc", "asc"]}
+        loading={status === "loading"}
+        initialState={{
+          ...filteredCampaigns,
+          pagination: { paginationModel: { pageSize: 10 } },
+        }}
+        pageSizeOptions={[5, 10, 25, { value: -1, label: "All" }]}
+        slots={{ noRowsOverlay: CustomNoRowsOverlay }}
+        sx={{ "--DataGrid-overlayHeight": "300px" }}
+      />
+    </Box>
   );
 };
 
