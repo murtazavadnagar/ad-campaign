@@ -1,47 +1,43 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
-import campaignReducer, { addCampaign } from "./src/redux/campaignSlice";
-import AddCampaignForm from "./src/components/AddCampaignForm";
-import userEvent from "@testing-library/user-event";
 import * as redux from "react-redux";
+import "@testing-library/jest-dom";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { renderWithProviders } from "../utils/components/test-utils";
+import AddCampaignForm from "../components/AddCampaignForm";
+import { addCampaign } from "../redux/campaignSlice";
+import userEvent from "@testing-library/user-event";
 
-// Mock Redux dispatch
-jest.mock("../redux/campaignSlice", () => ({
-  addCampaign: jest.fn(),
+jest.mock("react-redux", () => ({
+  ...jest.requireActual("react-redux"),
+  useDispatch: jest.fn(),
 }));
 
 describe("AddCampaignForm Component", () => {
-  let store;
   let dispatchMock;
 
   beforeEach(() => {
-    store = configureStore({
-      reducer: {
-        campaigns: campaignReducer,
-      },
-    });
-
     dispatchMock = jest.fn();
-    jest.spyOn(redux, "useDispatch").mockReturnValue(dispatchMock);
+    redux.useDispatch.mockReturnValue(dispatchMock);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it("should render the Add Campaign button", () => {
-    render(
-      <Provider store={store}>
-        <AddCampaignForm />
-      </Provider>
-    );
+    renderWithProviders(<AddCampaignForm />);
     expect(screen.getByText(/Add Campaign/i)).toBeInTheDocument();
   });
 
+  it("should open the form dialog when clicking the Add Campaign button", async () => {
+    renderWithProviders(<AddCampaignForm />);
+
+    fireEvent.click(screen.getByText(/Add Campaign/i));
+    expect(screen.getByText(/Add New Campaign/i)).toBeInTheDocument();
+  });
+
   it("should validate and submit form", async () => {
-    render(
-      <Provider store={store}>
-        <AddCampaignForm />
-      </Provider>
-    );
+    renderWithProviders(<AddCampaignForm />);
 
     fireEvent.click(screen.getByText(/Add Campaign/i));
 
@@ -62,11 +58,14 @@ describe("AddCampaignForm Component", () => {
     await waitFor(() =>
       expect(dispatchMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: "Test Campaign",
-          startDate: "01/02/2024",
-          endDate: "01/03/2024",
-          Budget: "5000",
-          userId: "2",
+          type: "campaigns/addCampaign",
+          payload: expect.objectContaining({
+            name: "Test Campaign",
+            startDate: "01/02/2024",
+            endDate: "01/03/2024",
+            Budget: "5000",
+            userId: "2",
+          }),
         })
       )
     );

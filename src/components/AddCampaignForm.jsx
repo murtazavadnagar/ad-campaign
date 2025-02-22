@@ -70,10 +70,18 @@ const AddCampaignForm = () => {
   };
 
   const onSubmit = (data) => {
-    const startDate = moment(data.startDate).format("DD/MM/YYYY");
-    const endDate = moment(data.endDate).format("DD/MM/YYYY");
+    const startDate = moment(data.startDate).format("MM/DD/YYYY");
+    const endDate = moment(data.endDate).format("MM/DD/YYYY");
 
-    dispatch(addCampaign({ ...data, startDate, endDate, id: Math.random() }));
+    const payload = {
+      name: data.name,
+      Budget: Number(data.Budget),
+      startDate,
+      endDate,
+      userId: Number(data.userId),
+      id: Math.floor(Math.random() * (100 - 10 + 1)) + 10,
+    };
+    dispatch(addCampaign(payload));
     handleClose();
   };
 

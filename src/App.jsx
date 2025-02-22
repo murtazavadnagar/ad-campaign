@@ -29,7 +29,6 @@ const App = () => {
         return;
       }
       dispatch(addBulkCampaigns(newCampaigns));
-      console.log("New campaigns added:", newCampaigns);
     };
   }, [dispatch]);
 

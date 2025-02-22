@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "jest --env=jsdom"
+    "test": "jest --env=jsdom",
+    "jest:clear": "jest --clearCache"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
