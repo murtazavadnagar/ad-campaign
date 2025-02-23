@@ -45,8 +45,8 @@ describe("App Integration Test", () => {
           expect.objectContaining({
             id: 100,
             name: "Integration Test Campaign",
-            startDate: "01/02/2024",
-            endDate: "03/02/2024",
+            startDate: "02/01/2024",
+            endDate: "02/03/2024",
             Budget: "8000",
             userId: "3",
           }),

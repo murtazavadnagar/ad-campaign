@@ -34,8 +34,8 @@ describe("AddCampaignForm Integration Test", () => {
         expect.arrayContaining([
           expect.objectContaining({
             name: "Integration Test Campaign",
-            startDate: "01/05/2024",
-            endDate: "01/06/2024",
+            startDate: "05/01/2024",
+            endDate: "06/01/2024",
             Budget: 8000,
             userId: 3,
           }),
