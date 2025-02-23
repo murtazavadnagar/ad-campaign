@@ -81,6 +81,8 @@ const CampaignTable = (props) => {
     },
   ];
 
+  // console.log("filteredCampaigns", filteredCampaigns);
+
   return (
     <Box sx={{ height: "auto", width: "100%", marginTop: 4 }}>
       <DataGrid
